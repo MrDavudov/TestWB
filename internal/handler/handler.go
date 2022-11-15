@@ -9,19 +9,19 @@ import (
 )
 
 
-type Handler struct {
+type server struct {
 	http.Server
 	router *mux.Router
 	services	*service.Service
 }
 
-func NewHandler(addr string, services *service.Service) *Handler {
-	s := &Handler{
+func NewHandler(port string, services *service.Service) *server {
+	s := &server{
 		Server: http.Server{
-			Addr:         addr,
+			Addr:         	port,
 			MaxHeaderBytes: 1<<20, // 1MB
-            ReadTimeout:  10 * time.Second,
-            WriteTimeout: 10 * time.Second,
+            ReadTimeout:  	10 * time.Second,
+            WriteTimeout: 	10 * time.Second,
 		},
 		router: mux.NewRouter(),
 		services:	services,
@@ -29,18 +29,17 @@ func NewHandler(addr string, services *service.Service) *Handler {
 
 	s.initRoutes()
 
+	//установить обработчик http-сервера
+	s.Handler = s.router
+
 	return s
 }
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.router.ServeHTTP(w, r)
+func (s *server) initRoutes() {
+	s.router.HandleFunc("/", s.handelAllCities)
 }
 
-func (h *Handler) initRoutes() {
-	h.router.HandleFunc("/", h.handelAllCities)
-}
-
-func (h *Handler) handelAllCities(w http.ResponseWriter, r *http.Request) {
+func (s *server) handelAllCities(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("All cities!\n"))
 }

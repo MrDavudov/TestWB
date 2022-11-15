@@ -1,15 +1,12 @@
 package main
 
 import (
-	"github.com/MrDavudov/TestWB/internal/handler"
 	"go.uber.org/zap"
-	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
-	
+	"github.com/MrDavudov/TestWB/internal/handler"
 )
 
 func main() {
-	// logrus.SetFormatter(new(logrus.TextFormatter))
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 	sugar := logger.Sugar()

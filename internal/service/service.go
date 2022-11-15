@@ -5,6 +5,7 @@ import (
 )
 
 type Weather interface {
+	
 }
 
 type Service struct {

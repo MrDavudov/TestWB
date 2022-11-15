@@ -3,6 +3,7 @@ package repository
 import "database/sql"
 
 type Weather interface {
+	
 }
 
 type Repository struct {
