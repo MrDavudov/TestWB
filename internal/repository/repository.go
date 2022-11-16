@@ -1,17 +1,30 @@
 package repository
 
-import "database/sql"
+import (
+	"database/sql"
 
-type Weather interface {
-	
+	"github.com/MrDavudov/TestWB/internal/model"
+)
+
+type DataTemp interface {
+}
+
+type Cities interface {
+	Save(model.Weather) error
+	Delete(city string) error
+	GetAllCities() ([]model.Weather, error)
 }
 
 type Repository struct {
-	Weather
+	DataTemp
+	Cities
 }
+
+var weather = &model.Weather{}
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		Weather: NewWeatherPostgres(db),
+		DataTemp: NewDataTempPostgres(db),
+		Cities: NewCitiesJson(weather),
 	}
 }

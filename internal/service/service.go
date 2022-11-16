@@ -1,19 +1,29 @@
 package service
 
 import (
+	"github.com/MrDavudov/TestWB/internal/model"
 	"github.com/MrDavudov/TestWB/internal/repository"
 )
 
-type Weather interface {
-	
+type DataTemp interface {
+	GetAllCities() ([]model.Weather, error)
+}
+
+type City interface {
+	Save(city string) error
+	Delete(city string) error
+	GetAllCities() ([]model.Weather, error)
 }
 
 type Service struct {
-	Weather
+	DataTemp
+	City
 }
 
 func NewService(repo *repository.Repository) *Service {
 	return &Service{
-		Weather: NewWeatherService(repo.Weather),
+		DataTemp: NewDataTempService(repo.DataTemp),
+		City: NewCitiesService(repo.Cities),
 	}
 }
+

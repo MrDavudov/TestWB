@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "Moscow",
+    "Lat": 55.7504461,
+    "Lon": 37.6174943,
+    "Country": "RU",
+    "DtTemp": null
+  },
+  {
+    "Name": "London",
+    "Lat": 51.5073219,
+    "Lon": -0.1276474,
+    "Country": "GB",
+    "DtTemp": null
+  }
+]

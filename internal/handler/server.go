@@ -6,9 +6,9 @@ import (
 	"github.com/MrDavudov/TestWB/internal/repository"
 	"github.com/MrDavudov/TestWB/internal/service"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	_ "github.com/lib/pq"
 )
 
 func Start(port string) error {
@@ -35,12 +35,16 @@ func Start(port string) error {
 	if err != nil {
 		sugar.Fatalf("failed to initialize db: %s", err)
 	}
-	
+
 	repository := repository.NewRepository(db)
 	services := service.NewService(repository)
 	srv := NewHandler(port, services)
 
 	sugar.Info("Start server")
+
+	go func() {
+		
+	}()
 
 	return srv.ListenAndServe()
 }
