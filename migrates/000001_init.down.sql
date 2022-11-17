@@ -1,1 +1,1 @@
-DROP TABLE datatemp
+DROP TABLE datatemp;
