@@ -16,7 +16,7 @@ const pathCity = "/geo/1.0/direct?"
 const pathWeather = "/data/2.5/forecast?"
 const apiKeys = "&appid=90f2edc318c106c65581f4052ad16c6f"
 
-func GetCity(city string) model.Weather {
+func GetCity(city string) (model.Weather, error) {
 	type City struct {
 		Name    string  `json:"name"`
 		Lat     float64 `json:"lat"`
@@ -24,28 +24,24 @@ func GetCity(city string) model.Weather {
 		Country string  `json:"country"`
 	}
 
-	var logger, _ = zap.NewProduction()
-	defer logger.Sync()
-	sugar := logger.Sugar()
-
 	resp, err := http.Get(base + pathCity + "q=" + city + apiKeys)
 	if err != nil {
-		sugar.Fatal(err)
+		return model.Weather{}, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		sugar.Fatal(err)
+		return model.Weather{}, err
 	}
 	if string(body) == "[]" {
-		sugar.Fatal("error no such city")
+		return model.Weather{}, fmt.Errorf("error no such city")
 	}
 
 	obj := []City{}
 	err = json.Unmarshal(body, &obj)
 	if err != nil {
-		sugar.Fatal(err)
+		return model.Weather{}, err
 	}
 
 	return model.Weather{
@@ -53,7 +49,7 @@ func GetCity(city string) model.Weather {
 		Lat:		obj[0].Lat,
 		Lon:		obj[0].Lon,
 		Country:	obj[0].Country,
-	}
+	}, nil
 }
 
 func GetDataTemp(w []model.Weather) []model.Weather {

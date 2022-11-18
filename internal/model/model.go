@@ -1,14 +1,14 @@
 package model
 
 type Weather struct {
-	Name    string
-	Lat     float64
-	Lon     float64
-	Country string
-	DtTemp	[]DtTemp
+	Name    string   `json:"name" binding:"required"`
+	Lat     float64  `json:"lat"`
+	Lon     float64  `json:"lon"`
+	Country string   `json:"country"`
+	DtTemp  []DtTemp `json:"dt_temp"`
 }
 
 type DtTemp struct {
-	Dt   string
-	Temp float64
+	Dt   string  `json:"dt"`
+	Temp float64 `json:"temp"`
 }

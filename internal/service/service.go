@@ -6,6 +6,7 @@ import (
 )
 
 type DataTemp interface {
+	GetCity(city string) (model.Weather, error)
 	GetAllCities() ([]model.Weather, error)
 }
 

@@ -18,7 +18,10 @@ func NewCitiesService(repo repository.Cities) *CitiesService {
 }
 
 func (s *CitiesService) Save(city string) error {
-	weather := GetCity(city)
+	weather, err := GetCity(city)
+	if err != nil {
+		return err
+	}
 
 	if err := FindJsonDB(); err != nil {
 		return err
