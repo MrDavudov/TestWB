@@ -26,12 +26,6 @@ func (r *RepositorySQL) SaveAsync(w []model.Weather) error {
 							DO UPDATE SET temp = $2`, dataTemp)
 	for i := range w {
 		for j := range w[i].DtTemp {
-			// t, err := time.Parse(dataIso, w[i].DtTemp[j].Dt)
-			// if err != nil {
-			// 	return err
-			// }
-			// upt := t.Format("2006-01-02")
-
 			_, err := r.db.Exec(query, w[i].Name, w[i].DtTemp[j].Temp, w[i].DtTemp[j].Dt)
 			if err != nil {
 				return err
@@ -47,12 +41,6 @@ func (r *RepositorySQL) SaveAsync(w []model.Weather) error {
 func (r *RepositorySQL) Save(w model.Weather) error {
 	query := fmt.Sprintf(`INSERT INTO %s (city, temp, dt) VALUES ($1, $2, $3)`, dataTemp)
 	for i := range w.DtTemp {
-		// t, err := time.Parse(dataIso, w.DtTemp[i].Dt)
-		// if err != nil {
-		// 	return err
-		// }
-		// upt := t.Format("2006-01-02")
-
 		_, err := r.db.Exec(query, w.Name, w.DtTemp[i].Temp, w.DtTemp[i].Dt)
 		if err != nil {
 			return err
