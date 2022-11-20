@@ -88,7 +88,7 @@ func GetDataTempAll(w []model.Weather) []model.Weather {
 
 		for j := range obj.List {
 			if strings.Contains(obj.List[j].Data, "12:00") {
-				dt := strings.TrimPrefix(obj.List[j].Data, " 12:00:00")
+				dt := strings.TrimSuffix(obj.List[j].Data, " 12:00:00")
 				d := model.DtTemp {
 					Dt: dt,
 					Temp: obj.List[j].Main.Temp,
@@ -133,7 +133,7 @@ func GetDataTempCity(w model.Weather) (model.Weather, error) {
 
 	for i := range obj.List {
 		if strings.Contains(obj.List[i].Data, "12:00") {
-			dt := strings.TrimPrefix(obj.List[i].Data, " 12:00:00")
+			dt := strings.TrimSuffix(obj.List[i].Data, " 12:00:00")
 			d := model.DtTemp {
 				Dt: dt,
 				Temp: obj.List[i].Main.Temp,
