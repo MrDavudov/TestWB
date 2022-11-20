@@ -2,6 +2,7 @@ package service
 
 import (
 	"sort"
+	"time"
 
 	"github.com/MrDavudov/TestWB/internal/model"
 	"github.com/MrDavudov/TestWB/internal/repository"
@@ -90,4 +91,16 @@ func (s *CitiesService) GetCity(city string) (model.Weather, error) {
 	obj.DtTemp = append(obj.DtTemp, m)
 
 	return obj, nil
+}
+
+func (s *CitiesService) SaveAsync() error {
+	time.Sleep(time.Second * 10)
+	obj, err := s.GetAllCities()
+	if err != nil {
+		return err
+	}
+
+	obj = GetDataTempAll(obj)
+
+	return s.rSQL.SaveAsync(obj)
 }

@@ -7,6 +7,7 @@ import (
 
 type City interface {
 	Save(city string) (model.Weather, error)
+	SaveAsync() error
 	Delete(city string) error
 	GetCity(city string) (model.Weather, error)
 	GetAllCities() ([]model.Weather, error)
