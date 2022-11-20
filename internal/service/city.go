@@ -75,11 +75,12 @@ func (s *CitiesService) GetCity(city string) (model.Weather, error) {
 	}
 
 	var temp float64
+	var infoData = obj.DtTemp[0].Dt + " - " + obj.DtTemp[len(obj.DtTemp)-1].Dt
 	for i := range obj.DtTemp {
 		temp += obj.DtTemp[i].Temp
 	}
 	m := model.DtTemp{
-		Dt: "5 days weather",
+		Dt: infoData,
 		Temp: temp / 5,
 	}
 	obj.DtTemp = []model.DtTemp{}
