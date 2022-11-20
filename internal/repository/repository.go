@@ -9,6 +9,7 @@ import (
 type ReposSQL interface {
 	SaveAsync([]model.Weather) error
 	Save(model.Weather) error
+	Delete(city string) error
 }
 
 type ReposJSON interface {

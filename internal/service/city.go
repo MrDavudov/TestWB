@@ -43,6 +43,9 @@ func (s *CitiesService) Save(city string) (model.Weather, error) {
 
 // Delete city in json
 func (s *CitiesService) Delete(city string) error {
+	if err := s.rSQL.Delete(city); err != nil {
+		return err
+	}
 	return s.rJSON.Delete(city)
 }
 
