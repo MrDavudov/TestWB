@@ -18,7 +18,7 @@ type Server struct {
 	httpServer 	*http.Server
 }
 
-func (s *Server) Start(port string) error {
+func (s *Server) Start(port string) {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 	sugar := logger.Sugar()
@@ -58,8 +58,13 @@ func (s *Server) Start(port string) error {
 	services := service.NewService(repository)
 	handlers := NewHandler(port, services)
 
+	// Проверка существует ли db.json, если нет то создать
+	if err := FindJsonDB(); err != nil {
+		sugar.Fatalf("failed create db.json: %s", err)
+	}
+
 	// return srv.httpServer.ListenAndServe()
-	return handlers.router.Run(port)
+	handlers.router.Run(port)
 }
 
 func initConfig() error {
@@ -72,6 +77,23 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return s.httpServer.Shutdown(ctx)
 }
 
-func (s *Server) DBClose(ctx context.Context) error {
-	return s.httpServer.Shutdown(ctx)
+func FindJsonDB() error {
+	const jsonFile = "./db.json"
+
+	_, err := os.Stat(jsonFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			_, err := os.Create("db.json")
+			if err != nil {
+				return err
+			}
+
+			err = os.WriteFile(jsonFile, []byte("[]"), 0666)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

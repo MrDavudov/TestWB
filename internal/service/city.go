@@ -1,69 +1,89 @@
 package service
 
 import (
-	"os"
+	"sort"
 
 	"github.com/MrDavudov/TestWB/internal/model"
 	"github.com/MrDavudov/TestWB/internal/repository"
 )
 
 type CitiesService struct {
-	repo repository.Cities
+	rJSON 	repository.ReposJSON
+	rSQL	repository.ReposSQL
 }
 
-func NewCitiesService(repo repository.Cities) *CitiesService {
+func NewCitiesService(rJSON repository.ReposJSON, rSQL repository.ReposSQL) *CitiesService {
 	return &CitiesService{
-		repo: repo,
+		rJSON: rJSON,
+		rSQL: rSQL,
 	}
 }
 
-func (s *CitiesService) Save(city string) error {
-	weather, err := GetCity(city)
+// Save city in json
+func (s *CitiesService) Save(city string) (model.Weather, error) {
+	// Получения местоположения города
+	obj, err := GetCity(city)
 	if err != nil {
-		return err
+		return model.Weather{}, err
 	}
 
-	if err := FindJsonDB(); err != nil {
-		return err
+	// По местоположению ищет погоду
+	obj, err = GetDataTempCity(obj)
+	if err != nil {
+		return model.Weather{}, err
 	}
 
-	return s.repo.Save(weather)
+	// Сохраняет погоду в бд postgres
+	if err := s.rSQL.Save(obj); err != nil {
+		return model.Weather{}, err
+	}
+
+	return obj, s.rJSON.Save(obj)
 }
 
+// Delete city in json
 func (s *CitiesService) Delete(city string) error {
-	if err := FindJsonDB(); err != nil {
-		return err
-	}
-
-	return s.repo.Delete(city)
+	return s.rJSON.Delete(city)
 }
 
+// Get all cities
 func (s *CitiesService) GetAllCities() ([]model.Weather, error) {
-	if err := FindJsonDB(); err != nil {
-		return []model.Weather{}, err
+	obj, err := s.rJSON.GetAll(); 
+	if err != nil {
+		return nil, err
 	}
 
-	return s.repo.GetAllCities()
+	sort.SliceStable(obj, func(i, j int) bool {
+		return obj[i].Name < obj[j].Name
+	})
+
+	obj = GetDataTempAll(obj)
+	
+	return obj, nil
 }
 
-// Проверка существует ли такой файл
-func FindJsonDB() error {
-	const jsonFile = "./db.json"
-
-	_, err := os.Stat(jsonFile)
+// Get city
+func (s *CitiesService) GetCity(city string) (model.Weather, error) {
+	obj, err := s.rJSON.Get(city); 
 	if err != nil {
-		if os.IsNotExist(err) {
-			_, err := os.Create("db.json")
-			if err != nil {
-				return err
-			}
-
-			err = os.WriteFile(jsonFile, []byte("[]"), 0666)
-			if err != nil {
-				return err
-			}
-		}
+		return model.Weather{}, err
 	}
 
-	return nil
+	obj, err = GetDataTempCity(obj)
+	if err != nil {
+		return model.Weather{}, err
+	}
+
+	var temp float64
+	for i := range obj.DtTemp {
+		temp += obj.DtTemp[i].Temp
+	}
+	m := model.DtTemp{
+		Dt: "5 days weather",
+		Temp: temp / 5,
+	}
+	obj.DtTemp = []model.DtTemp{}
+	obj.DtTemp = append(obj.DtTemp, m)
+
+	return obj, nil
 }

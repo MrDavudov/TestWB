@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-const dataTemp = "data_temp"
+const dataTemp = "datatemp"
 
 type Config struct {
 	Host     string

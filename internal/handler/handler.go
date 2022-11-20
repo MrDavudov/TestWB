@@ -1,14 +1,11 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/MrDavudov/TestWB/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 type handler struct {
-	httpServer 	*http.Server
 	router 		*gin.Engine
 	services	*service.Service
 }

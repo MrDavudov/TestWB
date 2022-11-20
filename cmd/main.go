@@ -22,9 +22,7 @@ func main() {
 
 	srv := new(handler.Server)
 	go func() {
-		if err := srv.Start(viper.GetString("port")); err != nil {
-			sugar.Fatalf("errors occured while running http server: %s", err)
-		}
+		srv.Start(viper.GetString("port"))
 	}()
 
 	sugar.Info("Start server")

@@ -15,7 +15,7 @@ func (s *handler) home(c *gin.Context) {
 
 // Get all city
 func (s *handler) allCities(c *gin.Context) {
-	citiesAll, err := s.services.DataTemp.GetAllCities()
+	citiesAll, err := s.services.GetAllCities()
 	if err != nil  {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -33,7 +33,7 @@ func (s *handler) getCity(c *gin.Context) {
 		return
 	}
 
-	city, err := s.services.DataTemp.GetCity(request.Name)
+	city, err := s.services.GetCity(request.Name)
 	if err != nil  {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -51,13 +51,7 @@ func (s *handler) cityCreate(c *gin.Context) {
 		return
 	}
 
-	err := s.services.City.Save(request.Name)
-	if err != nil  {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	city, err := s.services.GetCity(request.Name)
+	city, err := s.services.Save(request.Name); 
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -75,7 +69,7 @@ func (s *handler) cityDelete(c *gin.Context) {
 		return
 	}
 
-	err := s.services.City.Save(request.Name)
+	err := s.services.City.Delete(request.Name)
 	if err != nil  {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

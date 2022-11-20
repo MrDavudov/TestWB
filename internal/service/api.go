@@ -52,7 +52,7 @@ func GetCity(city string) (model.Weather, error) {
 	}, nil
 }
 
-func GetDataTemp(w []model.Weather) []model.Weather {
+func GetDataTempAll(w []model.Weather) []model.Weather {
 	type DataTemp struct {
 		List []struct {
 			Main struct {
@@ -88,14 +88,59 @@ func GetDataTemp(w []model.Weather) []model.Weather {
 
 		for j := range obj.List {
 			if strings.Contains(obj.List[j].Data, "12:00") {
+				dt := strings.TrimPrefix(obj.List[j].Data, " 12:00:00")
 				d := model.DtTemp {
-					Dt: obj.List[j].Data,
+					Dt: dt,
 					Temp: obj.List[j].Main.Temp,
 				}
+
 				w[i].DtTemp = append(w[i].DtTemp, d)
 			}
 		}
 	}
 
 	return w
+}
+
+func GetDataTempCity(w model.Weather) (model.Weather, error) {
+	type DataTemp struct {
+		List []struct {
+			Main struct {
+				Temp float64 `json:"temp"`
+			} `json:"main"`
+			Data string `json:"dt_txt"`
+		} `json:"list"`
+	}
+
+	lat := fmt.Sprintf("lat=%f", w.Lat)
+	lon := fmt.Sprintf("&lon=%f", w.Lon)
+
+	resp, err := http.Get(base + pathWeather + lat + lon + "&units=metric" + apiKeys)
+	if err != nil {
+		return model.Weather{}, err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return model.Weather{}, err
+	}
+
+	obj := DataTemp{}
+	err = json.Unmarshal(body, &obj)
+	if err != nil {
+		return model.Weather{}, err
+	}
+
+	for i := range obj.List {
+		if strings.Contains(obj.List[i].Data, "12:00") {
+			dt := strings.TrimPrefix(obj.List[i].Data, " 12:00:00")
+			d := model.DtTemp {
+				Dt: dt,
+				Temp: obj.List[i].Main.Temp,
+			}
+			w.DtTemp = append(w.DtTemp, d)
+		}
+	}
+
+	return w, nil
 }

@@ -6,25 +6,28 @@ import (
 	"github.com/MrDavudov/TestWB/internal/model"
 )
 
-type DataTemp interface {
+type ReposSQL interface {
+	SaveAsync([]model.Weather) error
+	Save(model.Weather) error
 }
 
-type Cities interface {
+type ReposJSON interface {
 	Save(model.Weather) error
-	Delete(city string) error
-	GetAllCities() ([]model.Weather, error)
+	Delete(string) error
+	GetAll() ([]model.Weather, error)
+	Get(string) (model.Weather, error)
 }
 
 type Repository struct {
-	DataTemp
-	Cities
+	ReposSQL
+	ReposJSON
 }
 
 var weather = &model.Weather{}
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		DataTemp: NewDataTempPostgres(db),
-		Cities: NewCitiesJson(weather),
+		ReposSQL: NewRepositorySQL(db),
+		ReposJSON: NewRepositoryJSON(weather),
 	}
 }
