@@ -63,11 +63,11 @@ func (s *Server) Start(port string) {
 		sugar.Fatalf("failed create db.json: %s", err)
 	}
 
-	go func() {
-		if err := handlers.services.SaveAsync(); err != nil {
-			sugar.Fatalf("failed save async in db: %s", err)
-		}
-	}()
+	// go func() {
+	// 	if err := handlers.services.SaveAsync(); err != nil {
+	// 		sugar.Fatalf("failed save async in db: %s", err)
+	// 	}
+	// }()
 
 	// return srv.httpServer.ListenAndServe()
 	handlers.router.Run(port)

@@ -1,0 +1,30 @@
+@host = http://localhost:8080
+
+### Главная страница
+GET {{host}}/ HTTP/1.1
+content-type: application/json
+
+### Запрос всех городов
+GET {{host}}/all HTTP/1.1
+content-type: application/json
+
+### Запрос по отдельному городу с кратким описанием
+GET {{host}}/api/city HTTP/1.1
+content-type: application/json
+{
+    "name": "Paris"
+}
+
+### Добавления города
+POST {{host}}/city HTTP/1.1
+content-type: application/json
+{
+    "name": "Paris" 
+}
+
+### Удаление города
+DELETE  {{host}}/city HTTP/1.1
+content-type: application/json
+{
+    "name": "Paris" 
+}
