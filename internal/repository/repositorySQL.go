@@ -39,6 +39,7 @@ func (r *RepositorySQL) SaveAsync(w []model.Weather) error {
 }
 
 func (r *RepositorySQL) Save(w model.Weather) error {
+	fmt.Println(w)
 	query := fmt.Sprintf(`INSERT INTO %s (city, temp, dt) VALUES ($1, $2, $3)`, dataTemp)
 	for i := range w.DtTemp {
 		_, err := r.db.Query(query, w.Name, w.DtTemp[i].Temp, w.DtTemp[i].Dt)

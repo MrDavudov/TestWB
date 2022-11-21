@@ -1,7 +1,7 @@
 package model
 
 type Weather struct {
-	Name    string   `json:"name" binding:"required"`
+	Name    string   `json:"name" db:"city" binding:"required"`
 	Lat     float64  `json:"lat"`
 	Lon     float64  `json:"lon"`
 	Country string   `json:"country"`
@@ -9,6 +9,6 @@ type Weather struct {
 }
 
 type DtTemp struct {
-	Dt   string  `json:"dt"`
-	Temp float64 `json:"temp"`
+	Dt   string  `json:"dt" db:"dt"`
+	Temp float64 `json:"temp" db:"temp"`
 }
