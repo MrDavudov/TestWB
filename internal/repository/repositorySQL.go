@@ -22,7 +22,7 @@ func NewRepositorySQL(db *sql.DB) *RepositorySQL {
 
 func (r *RepositorySQL) SaveAsync(w []model.Weather) error {
 	query := fmt.Sprintf(`INSERT INTO %s (city, temp, dt) VALUES ($1, $2, $3)
-							ON CONFLICT (city, dt)
+							ON CONFLICT (id)
 							DO UPDATE SET temp=EXCLUDED.temp`, dataTemp)
 	for i := range w {
 		for j := range w[i].DtTemp {
