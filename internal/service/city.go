@@ -94,7 +94,7 @@ func (s *CitiesService) GetCity(city string) (model.Weather, error) {
 }
 
 func (s *CitiesService) SaveAsync() error {
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 5)
 	obj, err := s.GetAllCities()
 	if err != nil {
 		return err
