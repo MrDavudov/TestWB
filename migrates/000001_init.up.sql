@@ -4,3 +4,5 @@ CREATE TABLE datatemp (
     temp    varchar(30)     not null,
     dt      date          
 );
+
+CREATE UNIQUE INDEX city_dt_idx ON datatemp (city, dt);

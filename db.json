@@ -1,23 +1,9 @@
 [
   {
-    "name": "Paris",
-    "lat": 48.8588897,
-    "lon": 2.3200410217200766,
-    "country": "FR",
-    "dt_temp": null
-  },
-  {
     "name": "Moscow",
     "lat": 55.7504461,
     "lon": 37.6174943,
     "country": "RU",
-    "dt_temp": null
-  },
-  {
-    "name": "Amsterdam",
-    "lat": 52.3727598,
-    "lon": 4.8936041,
-    "country": "NL",
     "dt_temp": null
   }
 ]

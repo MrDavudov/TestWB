@@ -1,18 +1,20 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/MrDavudov/TestWB/internal/service"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-type handler struct {
-	router 		*gin.Engine
+type server struct {
+	router 		*mux.Router
 	services	*service.Service
 }
 
-func NewHandler(port string, services *service.Service) *handler {
-	s := &handler{
-		router: gin.Default(),
+func NewHandler(services *service.Service) *server {
+	s := &server{
+		router:  	mux.NewRouter(),
 		services:	services,
 	}
 
@@ -21,14 +23,14 @@ func NewHandler(port string, services *service.Service) *handler {
 	return s
 }
 
-func (s *handler) initRoutes() *gin.Engine {
-	api := s.router.GET("/", s.home)
-	{
-		api.GET("/all", s.allCities)
-		api.GET("all/:city", s.getCity)
-		api.POST("/city", s.cityCreate)
-		api.DELETE("/city", s.cityDelete)
-	}
-	
-	return s.router
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.router.ServeHTTP(w, r)
+}
+
+func (s *server) initRoutes() {
+	s.router.HandleFunc("/", s.home).Methods("GET")
+	s.router.HandleFunc("/all", s.allCities).Methods("GET")
+	s.router.HandleFunc("/all/{city}", s.getCity).Methods("GET")
+	s.router.HandleFunc("/city", s.cityCreate()).Methods("POST")
+	s.router.HandleFunc("/city", s.cityDelete()).Methods("DELETE")
 }

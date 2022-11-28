@@ -85,7 +85,7 @@ func (s *CitiesService) GetCity(city string) (model.Weather, error) {
 	}
 	m := model.DtTemp{
 		Dt: infoData,
-		Temp: temp / 5,
+		Temp: temp / 5.00,
 	}
 	obj.DtTemp = []model.DtTemp{}
 	obj.DtTemp = append(obj.DtTemp, m)
@@ -94,7 +94,7 @@ func (s *CitiesService) GetCity(city string) (model.Weather, error) {
 }
 
 func (s *CitiesService) SaveAsync() error {
-	time.Sleep(time.Second * 5)
+	time.Sleep(time.Second * 60)
 	obj, err := s.GetAllCities()
 	if err != nil {
 		return err

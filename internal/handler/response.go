@@ -1,6 +1,9 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 type errorResponse struct {
 	Message string `json:"message"`
@@ -10,6 +13,14 @@ type StatusResponse struct {
 	Status 	string `json:"status"`
 }
 
-func newErrorResponse(c *gin.Context, statusCode int, msg string) {
-	c.AbortWithStatusJSON(statusCode, errorResponse{msg})
+func newErrorResponse(w http.ResponseWriter, code int, msg string) {
+	respondWithJSON(w, code, map[string]string{"error": msg})
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+    response, _ := json.Marshal(payload)
+
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(code)
+    w.Write(response)
 }

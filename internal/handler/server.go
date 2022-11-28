@@ -8,37 +8,17 @@ import (
 
 	"github.com/MrDavudov/TestWB/internal/repository"
 	"github.com/MrDavudov/TestWB/internal/service"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 type Server struct {
 	httpServer 	*http.Server
 }
 
-func (s *Server) Start(port string) {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	sugar := logger.Sugar()
-
-	s.httpServer = &http.Server{
-		Addr:         	port,
-		MaxHeaderBytes: 1<<20, // 1MB
-		ReadTimeout:  	10 * time.Second,
-		WriteTimeout: 	10 * time.Second,
-	}
-
-	// Инициализация config.yaml
-	if err := initConfig(); err != nil {
-		sugar.Fatalf("error Initializing configs: %s", err)
-	}
-
-	// Подключения .env
-	if err := godotenv.Load(); err != nil {
-		sugar.Fatalf("error loading env variables: %s", err)
-	}
+func (s *Server) Start(port string) error {
+	logrus.SetFormatter(new(logrus.TextFormatter))
 
 	// Подключение к БД
 	db, err := repository.NewPostgresDB(repository.Config{
@@ -50,35 +30,28 @@ func (s *Server) Start(port string) {
 		Password: os.Getenv("DB_PASSWORD"),
 	})
 	if err != nil {
-		sugar.Fatalf("failed to initialize db: %s", err)
+		logrus.Fatalf("failed to initialize db: %s", err)
+	}
+
+	// Проверка существует ли db.json, если нет то создать
+	if err := FindJsonDB(); err != nil {
+		logrus.Fatalf("failed create db.json: %s", err)
 	}
 
 	// Взаимосвязи
 	repository := repository.NewRepository(db)
 	services := service.NewService(repository)
-	handlers := NewHandler(port, services)
+	handlers := NewHandler(services)
 
-	// Проверка существует ли db.json, если нет то создать
-	if err := FindJsonDB(); err != nil {
-		sugar.Fatalf("failed create db.json: %s", err)
+	s.httpServer = &http.Server{
+		Addr:         	port,
+		Handler: handlers,
+		MaxHeaderBytes: 1<<20, // 1MB
+		ReadTimeout:  	10 * time.Second,
+		WriteTimeout: 	10 * time.Second,
 	}
 
-	go func() {
-		for {
-			if err := handlers.services.SaveAsync(); err != nil {
-				sugar.Fatalf("failed save async in db: %s", err)
-			}
-		}
-	}()
-
-	// return srv.httpServer.ListenAndServe()
-	handlers.router.Run(port)
-}
-
-func initConfig() error {
-	viper.AddConfigPath("configs")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
+	return s.httpServer.ListenAndServe()
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {

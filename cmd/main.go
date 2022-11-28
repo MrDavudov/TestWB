@@ -7,35 +7,53 @@ import (
 	"syscall"
 
 	"github.com/MrDavudov/TestWB/internal/handler"
+	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 func main() {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	sugar := logger.Sugar()
+	logrus.SetFormatter(new(logrus.TextFormatter))
 
+	// Инициализация config.yaml
 	if err := initConfig(); err != nil {
-		sugar.Fatalf("error Initializing configs: %s", err)
+		logrus.Fatalf("error Initializing configs: %s", err)
+	}
+
+	// Подключения .env
+	if err := godotenv.Load(); err != nil {
+		logrus.Fatalf("error loading env variables: %s", err)
 	}
 
 	srv := new(handler.Server)
 	go func() {
-		srv.Start(viper.GetString("port"))
+		if err := srv.Start(viper.GetString("port")); err != nil {
+			logrus.Fatalf("errors occured while running http server: %s", err)
+		}
 	}()
 
-	sugar.Info("Start server")
+	// // ассинхроонное обновление температуры каждую минуту
+	// go func() {
+	// 	for {
+	// 		if err := service.SaveAsync(); err != nil {
+	// 			logrus.Fatalf("failed save async in db: %s", err)
+	// 		}
+	// 	}
+	// }()
+
+	logrus.Info("Start server")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	sugar.Info("Shutting down")
+	logrus.Info("Shutting down")
 
 	if err := srv.Shutdown(context.Background()); err != nil {
-		sugar.Errorf("error occured on server shutting down: %s", err.Error())
+		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 	}
+
+
 }
 
 func initConfig() error {
@@ -43,3 +61,4 @@ func initConfig() error {
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()
 }
+
