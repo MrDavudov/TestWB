@@ -1,4 +1,4 @@
-package repository
+package json
 
 import (
 	"encoding/json"
@@ -7,13 +7,14 @@ import (
 	"os"
 
 	"github.com/MrDavudov/TestWB/internal/model"
+
 )
 
 type RepositoryJSON struct{
 	weather *model.Weather
 }
 
-func NewRepositoryJSON(w *model.Weather) *RepositoryJSON {
+func NewRepositoryJSON(weather *model.Weather) *RepositoryJSON {
 	return &RepositoryJSON{
 		weather: weather,
 	}

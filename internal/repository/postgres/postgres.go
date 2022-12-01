@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"database/sql"
@@ -9,18 +9,19 @@ import (
 )
 
 const dataIso = "2006-01-02"
+const dataTemp = "datatemp"
 
-type RepositorySQL struct {
+type Postgres struct {
 	db *sql.DB
 }
 
-func NewRepositorySQL(db *sql.DB) *RepositorySQL {
-	return &RepositorySQL{
+func NewRepositoryPostgres(db *sql.DB) *Postgres {
+	return &Postgres{
 		db: db,
 	}
 }
 
-func (r *RepositorySQL) SaveAsync(w []model.Weather) error {
+func (r *Postgres) SaveAsync(w []model.Weather) error {
 	query := fmt.Sprintf(`INSERT INTO %s (city, temp, dt) VALUES ($1, $2, $3)
 							ON CONFLICT (city, dt)
 							DO UPDATE SET temp=$2`, dataTemp)
@@ -39,7 +40,7 @@ func (r *RepositorySQL) SaveAsync(w []model.Weather) error {
 	return nil
 }
 
-func (r *RepositorySQL) Save(w model.Weather) error {
+func (r *Postgres) Save(w model.Weather) error {
 	fmt.Println(w)
 	query := fmt.Sprintf(`INSERT INTO %s (city, temp, dt) VALUES ($1, $2, $3)`, dataTemp)
 	for i := range w.DtTemp {
@@ -54,7 +55,7 @@ func (r *RepositorySQL) Save(w model.Weather) error {
 	return nil
 }
 
-func (r *RepositorySQL) Delete(city string) error {
+func (r *Postgres) Delete(city string) error {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE city = $1`, dataTemp)
 
 	_, err := r.db.Exec(query, city)

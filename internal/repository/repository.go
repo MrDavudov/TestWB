@@ -4,6 +4,8 @@ import (
 	"database/sql"
 
 	"github.com/MrDavudov/TestWB/internal/model"
+	"github.com/MrDavudov/TestWB/internal/repository/json"
+	"github.com/MrDavudov/TestWB/internal/repository/postgres"
 )
 
 type ReposSQL interface {
@@ -28,7 +30,7 @@ var weather = &model.Weather{}
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		ReposSQL: NewRepositorySQL(db),
-		ReposJSON: NewRepositoryJSON(weather),
+		ReposSQL: postgres.NewRepositoryPostgres(db),
+		ReposJSON: json.NewRepositoryJSON(weather),
 	}
 }

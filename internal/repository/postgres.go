@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-const dataTemp = "datatemp"
-
 type Config struct {
 	Host     string
 	Port     string

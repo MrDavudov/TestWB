@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/MrDavudov/TestWB/internal/handler"
 	"github.com/joho/godotenv"
@@ -14,6 +15,9 @@ import (
 
 func main() {
 	logrus.SetFormatter(new(logrus.TextFormatter))
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
 
 	// Инициализация config.yaml
 	if err := initConfig(); err != nil {
@@ -25,6 +29,7 @@ func main() {
 		logrus.Fatalf("error loading env variables: %s", err)
 	}
 
+	// Запуск сервера
 	srv := new(handler.Server)
 	go func() {
 		if err := srv.Start(viper.GetString("port")); err != nil {
@@ -32,14 +37,6 @@ func main() {
 		}
 	}()
 
-	// // ассинхроонное обновление температуры каждую минуту
-	// go func() {
-	// 	for {
-	// 		if err := service.SaveAsync(); err != nil {
-	// 			logrus.Fatalf("failed save async in db: %s", err)
-	// 		}
-	// 	}
-	// }()
 
 	logrus.Info("Start server")
 
@@ -47,13 +44,14 @@ func main() {
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	logrus.Info("Shutting down")
-
-	if err := srv.Shutdown(context.Background()); err != nil {
-		logrus.Errorf("error occured on server shutting down: %s", err.Error())
-	}
-
-
+	go func() {
+		<-ctx.Done()
+		if err := srv.Shutdown(context.Background()); err != nil {
+			logrus.Errorf("error occured on server shutting down: %s", err.Error())
+		}
+		logrus.Info("Stop server")
+		time.Sleep(5 * time.Second)
+	}()
 }
 
 func initConfig() error {

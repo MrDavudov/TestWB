@@ -51,11 +51,24 @@ func (s *Server) Start(port string) error {
 		WriteTimeout: 	10 * time.Second,
 	}
 
+	// ассинхроонное обновление температуры каждую минуту
+	go func() {
+		for {
+			if err := services.SaveAsync(); err != nil {
+				logrus.Fatalf("failed save async in db: %s", err)
+			}
+		}
+	}()
+
 	return s.httpServer.ListenAndServe()
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
 	return s.httpServer.Shutdown(ctx)
+}
+
+func (s *Server) Stop() error {
+	return s.httpServer.Close()
 }
 
 func FindJsonDB() error {
@@ -78,3 +91,4 @@ func FindJsonDB() error {
 
 	return nil
 }
+
