@@ -2,23 +2,39 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/MrDavudov/TestWB/internal/repository"
 	"github.com/MrDavudov/TestWB/internal/service"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+)
+
+const (
+	shutdownTimeout = 5 * time.Second
 )
 
 type Server struct {
 	httpServer 	*http.Server
 }
 
-func (s *Server) Start(port string) error {
+func (s *Server) Start(ctx context.Context) error {
 	logrus.SetFormatter(new(logrus.TextFormatter))
+
+	// Инициализация config.yaml
+	if err := initConfig(); err != nil {
+		logrus.Fatalf("error Initializing configs: %s", err)
+	}
+
+	// Подключения .env
+	if err := godotenv.Load(); err != nil {
+		logrus.Fatalf("error loading env variables: %s", err)
+	}
 
 	// Подключение к БД
 	db, err := repository.NewPostgresDB(repository.Config{
@@ -34,7 +50,7 @@ func (s *Server) Start(port string) error {
 	}
 
 	// Проверка существует ли db.json, если нет то создать
-	if err := FindJsonDB(); err != nil {
+	if err := repository.FindJsonDB(); err != nil {
 		logrus.Fatalf("failed create db.json: %s", err)
 	}
 
@@ -44,14 +60,23 @@ func (s *Server) Start(port string) error {
 	handlers := NewHandler(services)
 
 	s.httpServer = &http.Server{
-		Addr:         	port,
-		Handler: handlers,
+		Addr:         	viper.GetString("port"),
+		Handler: 		handlers,
 		MaxHeaderBytes: 1<<20, // 1MB
 		ReadTimeout:  	10 * time.Second,
 		WriteTimeout: 	10 * time.Second,
 	}
 
-	// ассинхроонное обновление температуры каждую минуту
+	// Запуск сервара
+	go func() {
+		if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logrus.Fatalf("listen and serve: %v", err)
+		}
+	}()
+	logrus.Infof("listening on localhost%s", s.httpServer.Addr)
+	logrus.Info("Start server")
+
+	// асинхронное обновление температуры каждые 60 секунд
 	go func() {
 		for {
 			if err := services.SaveAsync(); err != nil {
@@ -59,36 +84,37 @@ func (s *Server) Start(port string) error {
 			}
 		}
 	}()
+	<-ctx.Done()
 
-	return s.httpServer.ListenAndServe()
-}
+	// Плавное выход из программы
+	logrus.Println("shutting down server gracefully...")
 
-func (s *Server) Shutdown(ctx context.Context) error {
-	return s.httpServer.Shutdown(ctx)
-}
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
 
-func (s *Server) Stop() error {
-	return s.httpServer.Close()
-}
+	if err := s.httpServer.Shutdown(shutdownCtx); err != nil {
+		return fmt.Errorf("shutdown: %w", err) 
+	}
 
-func FindJsonDB() error {
-	const jsonFile = "./db.json"
+	longShutdown := make(chan struct{}, 1)
 
-	_, err := os.Stat(jsonFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			_, err := os.Create("db.json")
-			if err != nil {
-				return err
-			}
+	go func() {
+		time.Sleep(3 * time.Second)
+		longShutdown <- struct{}{}
+	}()
 
-			err = os.WriteFile(jsonFile, []byte("[]"), 0666)
-			if err != nil {
-				return err
-			}
-		}
+	select {
+	case <-shutdownCtx.Done():
+		return fmt.Errorf("Server shutdown: %w", ctx.Err())
+	case <-longShutdown:
+		logrus.Println("Stop server")
 	}
 
 	return nil
 }
 
+func initConfig() error {
+	viper.AddConfigPath("configs")
+	viper.SetConfigName("config")
+	return viper.ReadInConfig()
+}

@@ -9,22 +9,21 @@ GET {{host}}/all HTTP/1.1
 content-type: application/json
 
 ### Запрос по отдельному городу с кратким описанием
-GET {{host}}/api/city HTTP/1.1
+GET {{host}}/all/Moscow HTTP/1.1
 content-type: application/json
-{
-    "name": "Paris"
-}
 
 ### Добавления города
 POST {{host}}/city HTTP/1.1
 content-type: application/json
+
 {
-    "name": "Moscow" 
+    "city": "Астрахань"
 }
 
 ### Удаление города
-DELETE  {{host}}/city HTTP/1.1
+DELETE {{host}}/city HTTP/1.1
 content-type: application/json
+
 {
-    "name": "Paris" 
+    "city": "Moscow" 
 }

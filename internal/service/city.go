@@ -1,7 +1,9 @@
 package service
 
 import (
+	"math"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/MrDavudov/TestWB/internal/model"
@@ -11,6 +13,7 @@ import (
 type CitiesService struct {
 	rJSON 	repository.ReposJSON
 	rSQL	repository.ReposSQL
+	mu 		sync.Mutex
 }
 
 func NewCitiesService(rJSON repository.ReposJSON, rSQL repository.ReposSQL) *CitiesService {
@@ -27,15 +30,9 @@ func (s *CitiesService) Save(city string) (model.Weather, error) {
 	if err != nil {
 		return model.Weather{}, err
 	}
-
 	// По местоположению ищет погоду
 	obj, err = GetDataTempCity(obj)
 	if err != nil {
-		return model.Weather{}, err
-	}
-
-	// Сохраняет погоду в бд postgres
-	if err := s.rSQL.Save(obj); err != nil {
 		return model.Weather{}, err
 	}
 
@@ -47,6 +44,7 @@ func (s *CitiesService) Delete(city string) error {
 	if err := s.rSQL.Delete(city); err != nil {
 		return err
 	}
+
 	return s.rJSON.Delete(city)
 }
 
@@ -60,9 +58,8 @@ func (s *CitiesService) GetAllCities() ([]model.Weather, error) {
 	sort.SliceStable(obj, func(i, j int) bool {
 		return obj[i].Name < obj[j].Name
 	})
-
 	obj = GetDataTempAll(obj)
-	
+
 	return obj, nil
 }
 
@@ -85,10 +82,13 @@ func (s *CitiesService) GetCity(city string) (model.Weather, error) {
 	}
 	m := model.DtTemp{
 		Dt: infoData,
-		Temp: temp / 5.00,
+		Temp: math.Round(temp/5*100)/100,
 	}
 	obj.DtTemp = []model.DtTemp{}
+
+	s.mu.Lock()
 	obj.DtTemp = append(obj.DtTemp, m)
+	s.mu.Unlock()
 
 	return obj, nil
 }

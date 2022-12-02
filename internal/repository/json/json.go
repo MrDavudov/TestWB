@@ -5,13 +5,14 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"sync"
 
 	"github.com/MrDavudov/TestWB/internal/model"
-
 )
 
 type RepositoryJSON struct{
 	weather *model.Weather
+	mu	sync.RWMutex
 }
 
 func NewRepositoryJSON(weather *model.Weather) *RepositoryJSON {
@@ -24,11 +25,13 @@ const jsonFile = "./db.json"
 
 // Save city in JSON
 func (r *RepositoryJSON) Save(w model.Weather) error {
+	r.mu.RLock()
 	// Чтения файла для преобразование
 	rawDataIn, err := os.ReadFile(jsonFile)
 	if err != nil {
 		return err
 	}
+	r.mu.RUnlock()
 
 	setting := []model.Weather{}
 
@@ -44,32 +47,38 @@ func (r *RepositoryJSON) Save(w model.Weather) error {
 		}
 	}
 
+	r.mu.Lock()
 	setting = append(setting, model.Weather{
 		Name: w.Name,
 		Lat: w.Lat,
 		Lon: w.Lon,
 		Country: w.Country,
 	})
+	r.mu.Unlock()
 
 	rawDataOut, err := json.MarshalIndent(&setting, "", "  ")
 	if err != nil {
 		return err
 	}
   
+	r.mu.Lock()
 	err = ioutil.WriteFile(jsonFile, rawDataOut, 0)
 	if err != nil {
 		return err
 	}
+	r.mu.Unlock()
 
 	return nil
 }
 
 // Delete city in JSON
 func (r *RepositoryJSON) Delete(city string) error {
+	r.mu.RLock()
 	rawDataIn, err := os.ReadFile(jsonFile)
 	if err != nil {
 		return err
 	}
+	r.mu.RUnlock()
 
 	setting := []model.Weather{}
 
@@ -78,6 +87,7 @@ func (r *RepositoryJSON) Delete(city string) error {
 		return err
 	}
 
+	r.mu.Lock()
 	// удаления города если он есть
 	for i := range setting {
 		if setting[0].Name == city {
@@ -99,16 +109,19 @@ func (r *RepositoryJSON) Delete(city string) error {
 			return nil
 		}
 	}
+	r.mu.Unlock()
 
 	return errors.New("Error: такого города нет в БД")
 }
 
 // Get cities from JSON
 func (r *RepositoryJSON) GetAll() ([]model.Weather, error) {
+	r.mu.RLock()
 	rawDataIn, err := os.ReadFile(jsonFile)
 	if err != nil {
 		return nil, err
 	}
+	r.mu.RUnlock()
 
 	setting := []model.Weather{}
 
@@ -122,10 +135,12 @@ func (r *RepositoryJSON) GetAll() ([]model.Weather, error) {
 
 // Get city from JSON
 func (r *RepositoryJSON) Get(city string) (model.Weather, error) {
+	r.mu.RLock()
 	rawDataIn, err := os.ReadFile(jsonFile)
 	if err != nil {
 		return model.Weather{}, err
 	}
+	r.mu.RUnlock()
 
 	setting := []model.Weather{}
 

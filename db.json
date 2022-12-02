@@ -5,5 +5,47 @@
     "lon": 37.6174943,
     "country": "RU",
     "dt_temp": null
+  },
+  {
+    "name": "Paris",
+    "lat": 48.8588897,
+    "lon": 2.3200410217200766,
+    "country": "FR",
+    "dt_temp": null
+  },
+  {
+    "name": "Amsterdam",
+    "lat": 52.3727598,
+    "lon": 4.8936041,
+    "country": "NL",
+    "dt_temp": null
+  },
+  {
+    "name": "Saint Petersburg",
+    "lat": 59.938732,
+    "lon": 30.316229,
+    "country": "RU",
+    "dt_temp": null
+  },
+  {
+    "name": "Makhachkala",
+    "lat": 42.9830241,
+    "lon": 47.5048717,
+    "country": "RU",
+    "dt_temp": null
+  },
+  {
+    "name": "Kaspiysk",
+    "lat": 42.8881414,
+    "lon": 47.6424676,
+    "country": "RU",
+    "dt_temp": null
+  },
+  {
+    "name": "Astrakhan",
+    "lat": 46.3498308,
+    "lon": 48.0326203,
+    "country": "RU",
+    "dt_temp": null
   }
 ]
