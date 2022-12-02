@@ -28,7 +28,6 @@ func (r *Postgres) SaveAsync(w []model.Weather) error {
 							ON CONFLICT (city, dt)
 							DO UPDATE SET temp=$2`, dataTemp)
 	
-	
 	for i := range w {
 		r.wg.Add(1)
 		go func(w []model.Weather, i int) {
