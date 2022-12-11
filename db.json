@@ -47,5 +47,12 @@
     "lon": 48.0326203,
     "country": "RU",
     "dt_temp": null
+  },
+  {
+    "name": "Vatican City",
+    "lat": 41.9034912,
+    "lon": 12.4528349,
+    "country": "VA",
+    "dt_temp": null
   }
 ]

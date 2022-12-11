@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/MrDavudov/TestWB/internal/handler"
+	"github.com/MrDavudov/TestWB/pkg/handler"
 	"github.com/sirupsen/logrus"
 )
 
